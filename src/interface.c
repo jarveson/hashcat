@@ -497,6 +497,7 @@ static const char HT_15500[] = "JKS Java Key Store Private Keys (SHA1)";
 static const char HT_15600[] = "Ethereum Wallet, PBKDF2-HMAC-SHA256";
 static const char HT_15700[] = "Ethereum Wallet, SCRYPT";
 static const char HT_15900[] = "DPAPI masterkey file v2";
+static const char HT_16110[] = "PS3 Function NIDs";
 static const char HT_99999[] = "Plaintext";
 
 static const char HT_00011[] = "Joomla < 2.5.18";
@@ -15191,6 +15192,43 @@ int netbsd_sha1crypt_parse_hash (u8 *input_buf, u32 input_len, hash_t *hash_buf,
   return (PARSER_OK);
 }
 
+int ps3_nid_parse_hash (u8 *input_buf, u32 input_len, hash_t *hash_buf, MAYBE_UNUSED const hashconfig_t *hashconfig) 
+{
+  if ((input_len < DISPLAY_LEN_MIN_16110) || (input_len > DISPLAY_LEN_MAX_16110)) return (PARSER_GLOBAL_LENGTH);
+
+  u32 *digest = (u32 *) hash_buf->digest;
+
+  salt_t *salt = hash_buf->salt;
+
+  if (is_valid_hex_string (input_buf, 8) == false) return (PARSER_HASH_ENCODING);
+
+  digest[0] = hex_to_u32 ((const u8 *) &input_buf[ 0]);
+  digest[1] = 0;
+  digest[2] = 0;
+  digest[3] = 0;
+  digest[4] = 0;
+  
+  digest[0] -= SHA1M_A;
+  digest[1] -= SHA1M_B;
+  digest[2] -= SHA1M_C;
+  digest[3] -= SHA1M_D;
+  digest[4] -= SHA1M_E;
+
+  u32 salt_len = 32;
+
+  u8 salt_buf[32] = "6759659904250490566427499489741A";
+
+  u8 *salt_buf_ptr = (u8 *) salt->salt_buf;
+
+  salt_len = parse_and_store_salt (salt_buf_ptr, salt_buf, salt_len, hashconfig);
+
+  if (salt_len != 16) return (PARSER_SALT_LENGTH);
+
+  salt->salt_len = salt_len;
+
+  return (PARSER_OK);
+}
+
 int atlassian_parse_hash (u8 *input_buf, u32 input_len, hash_t *hash_buf, MAYBE_UNUSED const hashconfig_t *hashconfig)
 {
   if ((input_len < DISPLAY_LEN_MIN_12001) || (input_len > DISPLAY_LEN_MAX_12001)) return (PARSER_GLOBAL_LENGTH);
@@ -16111,6 +16149,7 @@ char *strhashtype (const u32 hash_mode)
     case 15600: return ((char *) HT_15600);
     case 15700: return ((char *) HT_15700);
     case 15900: return ((char *) HT_15900);
+    case 16110: return ((char *) HT_16110);
     case 99999: return ((char *) HT_99999);
   }
 
@@ -19224,6 +19263,9 @@ int ascii_digest (hashcat_ctx_t *hashcat_ctx, char *out_buf, const size_t out_le
     char        *hash_buf     = hashinfo_ptr[digest_cur]->orighash;
 
     snprintf (out_buf, out_len - 1, "%s", hash_buf);
+  else if (hash_mode == 16110)
+  {
+    snprintf(out_buf, out_len -1, "%08x", byte_swap_32(digest_buf[0]));
   }
   else if (hash_mode == 15300)
   {
@@ -24440,6 +24482,29 @@ int hashconfig_init (hashcat_ctx_t *hashcat_ctx)
                  hashconfig->dgst_pos3      = 3;
                  hashconfig->st_hash        = ST_HASH_15900;
                  hashconfig->st_pass        = ST_PASS_HASHCAT_PLAIN;
+                 break;
+
+    case 16110:  hashconfig->hash_type      = HASH_TYPE_SHA1;
+                 hashconfig->salt_type      = SALT_TYPE_EMBEDDED;
+                 hashconfig->attack_exec    = ATTACK_EXEC_INSIDE_KERNEL;
+                 hashconfig->opts_type      = OPTS_TYPE_PT_GENERATE_BE
+                                            | OPTS_TYPE_ST_ADD80
+                                            | OPTS_TYPE_ST_ADDBITS15
+                                            | OPTS_TYPE_ST_HEX;
+                 hashconfig->kern_type      = KERN_TYPE_PS3_NID;
+                 hashconfig->dgst_size      = DGST_SIZE_4_5;
+                 hashconfig->parse_func     = ps3_nid_parse_hash;
+                 hashconfig->opti_type      = OPTI_TYPE_ZERO_BYTE
+                                            | OPTI_TYPE_PRECOMPUTE_INIT
+                                            | OPTI_TYPE_PRECOMPUTE_MERKLE
+                                            | OPTI_TYPE_EARLY_SKIP
+                                            | OPTI_TYPE_NOT_ITERATED
+                                            | OPTI_TYPE_APPENDED_SALT
+                                            | OPTI_TYPE_RAW_HASH;
+                 hashconfig->dgst_pos0      = 0;
+                 hashconfig->dgst_pos1      = 1;
+                 hashconfig->dgst_pos2      = 2;
+                 hashconfig->dgst_pos3      = 3;
                  break;
 
     case 99999:  hashconfig->hash_type      = HASH_TYPE_PLAINTEXT;

@@ -1,0 +1,1 @@
+hashcat64.exe --potfile-disable -m 16110 -a 0 FF4A1633 ps3example.dict
