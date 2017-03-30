@@ -1765,6 +1765,7 @@ int filezilla_server_parse_hash   (u8 *input_buf, u32 input_len, hash_t *hash_bu
 int netbsd_sha1crypt_parse_hash   (u8 *input_buf, u32 input_len, hash_t *hash_buf, MAYBE_UNUSED const hashconfig_t *hashconfig);
 int atlassian_parse_hash          (u8 *input_buf, u32 input_len, hash_t *hash_buf, MAYBE_UNUSED const hashconfig_t *hashconfig);
 int ps3_nid_parse_hash            (u8 *input_buf, u32 input_len, hash_t *hash_buf, MAYBE_UNUSED const hashconfig_t *hashconfig);
+int ps4_nid_parse_hash            (u8 *input_buf, u32 input_len, hash_t *hash_buf, MAYBE_UNUSED const hashconfig_t *hashconfig);
 
 /**
  * hook functions
