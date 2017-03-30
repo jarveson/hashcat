@@ -282,6 +282,7 @@ static const char *USAGE_BIG[] =
   "   9900 | Radmin2                                          | Operating Systems",
   "    125 | ArubaOS                                          | Operating Systems",
   "  16110 | PS3 Function NID                                 | Operating-Systems",
+  "  16111 | PS4 Function NID                                 | Operating-Systems",
   "   7700 | SAP CODVN B (BCODE)                              | Enterprise Application Software (EAS)",
   "   7800 | SAP CODVN F/G (PASSCODE)                         | Enterprise Application Software (EAS)",
   "  10300 | SAP CODVN H (PWDSALTEDHASH) iSSHA-1              | Enterprise Application Software (EAS)",
