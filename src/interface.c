@@ -14534,10 +14534,6 @@ int ps3_nid_parse_hash (u8 *input_buf, u32 input_len, hash_t *hash_buf, MAYBE_UN
   digest[4] = 0;
   
   digest[0] -= SHA1M_A;
-  digest[1] -= SHA1M_B;
-  digest[2] -= SHA1M_C;
-  digest[3] -= SHA1M_D;
-  digest[4] -= SHA1M_E;
 
   u32 salt_len = 32;
 
