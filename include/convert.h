@@ -31,6 +31,8 @@ u8 int_to_base32  (const u8 c);
 u8 base32_to_int  (const u8 c);
 u8 int_to_base64  (const u8 c);
 u8 base64_to_int  (const u8 c);
+u8 ps4_base64_to_int (const u8 c);
+u8 ps4_int_to_base64 (const u8 c);
 
 u8 int_to_itoa32  (const u8 c);
 u8 itoa32_to_int  (const u8 c);

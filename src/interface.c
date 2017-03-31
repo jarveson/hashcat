@@ -648,6 +648,62 @@ static const char SIGNATURE_ETHEREUM_SCRYPT[]  = "$ethereum$s";
  * decoder / encoder
  */
 
+static void ps4_decode_hash (const u8 *in, u8* out_buf)
+{
+  u8 out_val0 = ps4_base64_to_int(in[10] & 0x7f);
+  u8 out_val1 = ps4_base64_to_int(in[ 9] & 0x7f);
+  u8 out_val2 = ps4_base64_to_int(in[ 8] & 0x7f);
+  u8 out_val3 = 0;
+
+  out_buf[3] = ((out_val1 << 4) & 0xf0) | ((out_val0 >> 2) & 0x0f);
+  out_buf[2] = ((out_val2 << 2) & 0xfc) | ((out_val1 >> 4) & 0x03);
+
+  out_val0 = ps4_base64_to_int(in[ 7] & 0x7f);
+  out_val1 = ps4_base64_to_int(in[ 6] & 0x7f);
+  out_val2 = ps4_base64_to_int(in[ 5] & 0x7f);
+  out_val3 = ps4_base64_to_int(in[ 4] & 0x7f);
+
+  out_buf[1] = ((out_val1 << 6) & 0xc0) | ((out_val0 >> 0) & 0x3f);
+  out_buf[0] = ((out_val2 << 4) & 0xf0) | ((out_val1 >> 2) & 0x0f);
+  out_buf[7] = ((out_val3 << 2) & 0xfc) | ((out_val2 >> 4) & 0x03);
+
+  out_val0 = ps4_base64_to_int(in[ 3] & 0x7f);
+  out_val1 = ps4_base64_to_int(in[ 2] & 0x7f);
+  out_val2 = ps4_base64_to_int(in[ 1] & 0x7f);
+  out_val3 = ps4_base64_to_int(in[ 0] & 0x7f);
+
+  out_buf[6] = ((out_val1 << 6) & 0xc0) | ((out_val0 >> 0) & 0x3f);
+  out_buf[5] = ((out_val2 << 4) & 0xf0) | ((out_val1 >> 2) & 0x0f);
+  out_buf[4] = ((out_val3 << 2) & 0xfc) | ((out_val2 >> 4) & 0x03);
+}
+
+static void ps4_encode_hash (const u8 *in, u8* out_buf)
+{
+  const u8 out_val0  = ps4_int_to_base64 (                        ((in[0] & 0xf) * 4  ));
+  const u8 out_val1  = ps4_int_to_base64 (((in[1] << 4) & 0x30) | ((in[0] >> 4) & 0x0f));
+  const u8 out_val2  = ps4_int_to_base64 (                        ((in[1] >> 2) & 0x3f));
+  const u8 out_val3  = ps4_int_to_base64 (                        ((in[2] >> 0) & 0x3f));
+  const u8 out_val4  = ps4_int_to_base64 (((in[3] << 2) & 0x3c) | ((in[2] >> 6) & 0x03));
+  const u8 out_val5  = ps4_int_to_base64 (((in[4] << 4) & 0x30) | ((in[3] >> 4) & 0x0f));
+  const u8 out_val6  = ps4_int_to_base64 (                        ((in[4] >> 2) & 0x3f));
+  const u8 out_val7  = ps4_int_to_base64 (                        ((in[5] >> 0) & 0x3f));
+  const u8 out_val8  = ps4_int_to_base64 (((in[6] << 2) & 0x3c) | ((in[5] >> 6) & 0x03));
+  const u8 out_val9  = ps4_int_to_base64 (((in[7] << 4) & 0x30) | ((in[6] >> 4) & 0x0f));
+  const u8 out_val10 = ps4_int_to_base64 (                        ((in[7] >> 2) & 0x3f));
+
+  out_buf[ 0] = out_val10 & 0x7f;
+  out_buf[ 1] = out_val9  & 0x7f;
+  out_buf[ 2] = out_val8  & 0x7f;
+  out_buf[ 3] = out_val7  & 0x7f;
+  out_buf[ 4] = out_val6  & 0x7f;
+  out_buf[ 5] = out_val5  & 0x7f;
+  out_buf[ 6] = out_val4  & 0x7f;
+  out_buf[ 7] = out_val3  & 0x7f;
+  out_buf[ 8] = out_val2  & 0x7f;
+  out_buf[ 9] = out_val1  & 0x7f;
+  out_buf[10] = out_val0 & 0x7f;
+}
+
 static void juniper_decrypt_hash (u8 *in, u8 *out)
 {
   // base64 decode
@@ -15228,25 +15284,23 @@ int ps3_nid_parse_hash (u8 *input_buf, u32 input_len, hash_t *hash_buf, MAYBE_UN
 
 int ps4_nid_parse_hash (u8 *input_buf, u32 input_len, hash_t *hash_buf, MAYBE_UNUSED const hashconfig_t *hashconfig) 
 {
-  if ((input_len < DISPLAY_LEN_MIN_16110) || (input_len > DISPLAY_LEN_MAX_16110)) return (PARSER_GLOBAL_LENGTH);
+  if ((input_len < DISPLAY_LEN_MIN_16111) || (input_len > DISPLAY_LEN_MAX_16111)) return (PARSER_GLOBAL_LENGTH);
 
   u32 *digest = (u32 *) hash_buf->digest;
 
   salt_t *salt = hash_buf->salt;
 
-  if (is_valid_hex_string (input_buf, 8) == false) return (PARSER_HASH_ENCODING);
+  u8 decoded[8];
 
-  digest[0] = hex_to_u32 ((const u8 *) &input_buf[ 0]);
-  digest[1] = 0;
+  ps4_decode_hash(input_buf, decoded);
+
+  memcpy(digest, decoded, 8);
   digest[2] = 0;
   digest[3] = 0;
   digest[4] = 0;
   
   digest[0] -= SHA1M_A;
   digest[1] -= SHA1M_B;
-  digest[2] -= SHA1M_C;
-  digest[3] -= SHA1M_D;
-  digest[4] -= SHA1M_E;
 
   u32 salt_len = 32;
 
@@ -19575,6 +19629,16 @@ int ascii_digest (hashcat_ctx_t *hashcat_ctx, char *out_buf, const size_t out_le
       iv,
       contents_len,
       contents);
+  else if (hash_mode == 16111)
+  {
+    u32 bswapped[2];
+    bswapped[0] = byte_swap_32(digest_buf[0]);
+    bswapped[1] = byte_swap_32(digest_buf[1]);
+
+    u8 encoded[11];
+
+    ps4_encode_hash((u8*)bswapped, encoded);
+    snprintf(out_buf, 11, "%s", (char*)encoded);
   }
   else if (hash_mode == 99999)
   {
@@ -24549,7 +24613,7 @@ int hashconfig_init (hashcat_ctx_t *hashcat_ctx)
                                             | OPTS_TYPE_ST_ADD80
                                             | OPTS_TYPE_ST_ADDBITS15
                                             | OPTS_TYPE_ST_HEX;
-                 hashconfig->kern_type      = KERN_TYPE_PS3_NID;
+                 hashconfig->kern_type      = KERN_TYPE_PS4_NID;
                  hashconfig->dgst_size      = DGST_SIZE_4_5;
                  hashconfig->parse_func     = ps4_nid_parse_hash;
                  hashconfig->opti_type      = OPTI_TYPE_ZERO_BYTE

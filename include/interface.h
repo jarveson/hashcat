@@ -1283,6 +1283,8 @@ typedef enum display_len
   DISPLAY_LEN_MAX_15900 =  1 + 7 + 1 + 1 + 1 + 1 + 1 + 100 + 1 + 6 + 1 + 6 + 1 + 10 + 1 + 32 + 1 + 4 + 1 + 512,
   DISPLAY_LEN_MIN_16110 = 8,
   DISPLAY_LEN_MAX_16110 = 8,
+  DISPLAY_LEN_MIN_16111 = 11,
+  DISPLAY_LEN_MAX_16111 = 11,
   DISPLAY_LEN_MIN_99999 = 1,
   DISPLAY_LEN_MAX_99999 = 55,
 
@@ -1608,6 +1610,7 @@ typedef enum kern_type
   KERN_TYPE_ETHEREUM_SCRYPT         = 15700,
   KERN_TYPE_DPAPIMK_V2              = 15900,
   KERN_TYPE_PS3_NID                 = 16110,
+  KERN_TYPE_PS4_NID                 = 16111,
   KERN_TYPE_PLAINTEXT               = 99999,
 
 } kern_type_t;
