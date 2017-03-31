@@ -1,0 +1,1 @@
+hashcat64.exe --potfile-disable -m 16111 -a 0 4mNocKrnnWg ps4example.dict

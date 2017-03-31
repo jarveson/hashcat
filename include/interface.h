@@ -1190,6 +1190,8 @@ typedef enum display_len
   DISPLAY_LEN_MAX_15200 =  1 + 10 + 1 + 2 + 1 + 8 + 1 + 5 + 1 + 20000,
   DISPLAY_LEN_MIN_16110 = 8,
   DISPLAY_LEN_MAX_16110 = 8,
+  DISPLAY_LEN_MIN_16111 = 11,
+  DISPLAY_LEN_MAX_16111 = 11,
   DISPLAY_LEN_MIN_99999 = 1,
   DISPLAY_LEN_MAX_99999 = 55,
 
@@ -1517,6 +1519,7 @@ typedef enum kern_type
   KERN_TYPE_FILEZILLA_SERVER        = 15000,
   KERN_TYPE_NETBSD_SHA1CRYPT        = 15100,
   KERN_TYPE_PS3_NID                 = 16110,
+  KERN_TYPE_PS4_NID                 = 16111,
   KERN_TYPE_PLAINTEXT               = 99999,
 
 } kern_type_t;
