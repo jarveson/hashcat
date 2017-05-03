@@ -19352,6 +19352,7 @@ int ascii_digest (hashcat_ctx_t *hashcat_ctx, char *out_buf, const size_t out_le
     char        *hash_buf     = hashinfo_ptr[digest_cur]->orighash;
 
     snprintf (out_buf, out_len - 1, "%s", hash_buf);
+  }
   else if (hash_mode == 16110)
   {
     snprintf(out_buf, out_len -1, "%08x", byte_swap_32(digest_buf[0]));
