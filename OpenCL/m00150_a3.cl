@@ -46,7 +46,7 @@ void m00150m (__local salt_t *s_salt_buf, u32 w0[4], u32 w1[4], u32 w2[4], u32 w
     //printf("key?: 0x%x, 0x%x, 0x%x, 0x%x\n", swap32(w0[0]), swap32(w0[1]), w0[2], w0[3]);
     //printf("salt?: 0x%x, 0x%x, 0x%x, 0x%x\n", salt_buf0[0], salt_buf0[1], salt_buf0[2], salt_buf0[3]);
 
-    u32 ipadData[16];
+    u32x ipadData[16];
     ipadData[0] = w0lr ^ 0x36363636;
     ipadData[1] = w0[1] ^ 0x36363636;
     ipadData[2] = w0[2] ^ 0x36363636;
@@ -64,7 +64,7 @@ void m00150m (__local salt_t *s_salt_buf, u32 w0[4], u32 w1[4], u32 w2[4], u32 w
     ipadData[14] = w3[2] ^ 0x36363636;
     ipadData[15] = w3[3] ^ 0x36363636;
 
-    u32 opadData[16];
+    u32x opadData[16];
     opadData[0] = w0[0] ^ 0x5c5c5c5c;
     opadData[1] = w0[1] ^ 0x5c5c5c5c;
     opadData[2] = w0[2] ^ 0x5c5c5c5c;
@@ -103,7 +103,7 @@ void m00150m (__local salt_t *s_salt_buf, u32 w0[4], u32 w1[4], u32 w2[4], u32 w
     sha1_update_64(&opad_ctx, &opadData[0], &opadData[4], &opadData[8], &opadData[12], 64);
     //printf("stateopad2: 0x%x, 0x%x, 0x%x, 0x%x, 0x%x\n", opad_ctx.h[0], opad_ctx.h[1], opad_ctx.h[2], opad_ctx.h[3], opad_ctx.h[4]);
 
-    u32 tmpData[16];
+    u32x tmpData[16];
     tmpData[0] = sha1_ctx.h[0];
     tmpData[1] = sha1_ctx.h[1];
     tmpData[2] = sha1_ctx.h[2];
@@ -171,7 +171,7 @@ void m00150s (__local salt_t *s_salt_buf, u32 w0[4], u32 w1[4], u32 w2[4], u32 w
     //printf("key?: 0x%x, 0x%x, 0x%x, 0x%x\n", swap32(w0[0]), swap32(w0[1]), w0[2], w0[3]);
     //printf("salt?: 0x%x, 0x%x, 0x%x, 0x%x\n", salt_buf0[0], salt_buf0[1], salt_buf0[2], salt_buf0[3]);
 
-    u32 ipadData[16];
+    u32x ipadData[16];
     ipadData[0] = w0lr ^ 0x36363636;
     ipadData[1] = w0[1] ^ 0x36363636;
     ipadData[2] = w0[2] ^ 0x36363636;
@@ -189,7 +189,7 @@ void m00150s (__local salt_t *s_salt_buf, u32 w0[4], u32 w1[4], u32 w2[4], u32 w
     ipadData[14] = 0x36363636;
     ipadData[15] = 0x36363636;
 
-    u32 opadData[16];
+    u32x opadData[16];
     opadData[0] = w0[0] ^ 0x5c5c5c5c;
     opadData[1] = w0[1] ^ 0x5c5c5c5c;
     opadData[2] = w0[2] ^ 0x5c5c5c5c;
@@ -228,7 +228,7 @@ void m00150s (__local salt_t *s_salt_buf, u32 w0[4], u32 w1[4], u32 w2[4], u32 w
     sha1_update_64(&opad_ctx, &opadData[0], &opadData[4], &opadData[8], &opadData[12], 64);
     //printf("stateopad2: 0x%x, 0x%x, 0x%x, 0x%x, 0x%x\n", opad_ctx.h[0], opad_ctx.h[1], opad_ctx.h[2], opad_ctx.h[3], opad_ctx.h[4]);
 
-    u32 tmpData[16];
+    u32x tmpData[16];
     tmpData[0] = sha1_ctx.h[0];
     tmpData[1] = sha1_ctx.h[1];
     tmpData[2] = sha1_ctx.h[2];
