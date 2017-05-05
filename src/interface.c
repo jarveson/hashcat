@@ -2218,7 +2218,7 @@ static void drupal7_encode (u8 digest[64], u8 buf[43])
 
 static u32 parse_and_store_salt (u8 *out, u8 *in, u32 salt_len, MAYBE_UNUSED const hashconfig_t *hashconfig)
 {
-  u32 tmp_u32[64] = { 0 };
+  u32 tmp_u32[0xAC0] = { 0 };
 
   u8 *tmp = (u8 *) tmp_u32;
 
@@ -2295,7 +2295,7 @@ static u32 parse_and_store_salt (u8 *out, u8 *in, u32 salt_len, MAYBE_UNUSED con
 
   if (hashconfig->opts_type & OPTS_TYPE_ST_ADD80)
   {
-    if (len >= 256) return UINT_MAX;
+    if (len >= 0xAB1) return UINT_MAX;
 
     tmp[len++] = 0x80;
   }
@@ -6573,20 +6573,23 @@ int hmacmd5_parse_hash (u8 *input_buf, u32 input_len, hash_t *hash_buf, MAYBE_UN
 
 int hmacsha1_parse_hash (u8 *input_buf, u32 input_len, hash_t *hash_buf, MAYBE_UNUSED const hashconfig_t *hashconfig)
 {
-  if (hashconfig->opts_type & OPTS_TYPE_ST_HEX)
+  /*if (input_len < 40)
+    return (PARSER_GLOBAL_LENGTH);*/
+
+  /*if (hashconfig->opts_type & OPTS_TYPE_ST_HEX)
   {
     if ((input_len < DISPLAY_LEN_MIN_150H) || (input_len > DISPLAY_LEN_MAX_150H)) return (PARSER_GLOBAL_LENGTH);
   }
   else
   {
     if ((input_len < DISPLAY_LEN_MIN_150) || (input_len > DISPLAY_LEN_MAX_150)) return (PARSER_GLOBAL_LENGTH);
-  }
+  }*/
 
   u32 *digest = (u32 *) hash_buf->digest;
 
   salt_t *salt = hash_buf->salt;
 
-  if (is_valid_hex_string (input_buf, 40) == false) return (PARSER_HASH_ENCODING);
+  /*if (is_valid_hex_string (input_buf, 40) == false) return (PARSER_HASH_ENCODING);
 
   digest[0] = hex_to_u32 ((const u8 *) &input_buf[ 0]);
   digest[1] = hex_to_u32 ((const u8 *) &input_buf[ 8]);
@@ -6598,17 +6601,57 @@ int hmacsha1_parse_hash (u8 *input_buf, u32 input_len, hash_t *hash_buf, MAYBE_U
   digest[1] = byte_swap_32 (digest[1]);
   digest[2] = byte_swap_32 (digest[2]);
   digest[3] = byte_swap_32 (digest[3]);
+  digest[4] = byte_swap_32 (digest[4]);*/
+
+  FILE *fp1 = fopen("PARAM.PFD", "rb");
+
+  if (fp1 == NULL) return (PARSER_HASH_FILE);
+
+  u8 bufhash[0x2F8];
+
+  const size_t nread1 = fread (&bufhash, sizeof (bufhash), 1, fp1);
+
+  if (nread1 != 1)
+  {
+    fclose (fp1);
+
+    return (PARSER_LUKS_FILE_SIZE);
+  }
+
+  memcpy(digest, &bufhash[0x2E4], 20);
+
+  digest[0] = byte_swap_32 (digest[0]);
+  digest[1] = byte_swap_32 (digest[1]);
+  digest[2] = byte_swap_32 (digest[2]);
+  digest[3] = byte_swap_32 (digest[3]);
   digest[4] = byte_swap_32 (digest[4]);
 
-  if (input_buf[40] != hashconfig->separator) return (PARSER_SEPARATOR_UNMATCHED);
+  /*if (input_buf[40] != hashconfig->separator) return (PARSER_SEPARATOR_UNMATCHED);
 
   u32 salt_len = input_len - 40 - 1;
 
-  u8 *salt_buf = input_buf + 40 + 1;
+  u8 *salt_buf = input_buf + 40 + 1;*/
 
   u8 *salt_buf_ptr = (u8 *) salt->salt_buf;
 
-  salt_len = parse_and_store_salt (salt_buf_ptr, salt_buf, salt_len, hashconfig);
+  FILE *fp = fopen("PARAM.SFO", "rb");
+
+  if (fp == NULL) return (PARSER_HASH_FILE);
+
+  u8 buf[0xAB0];
+
+  const size_t nread = fread (&buf, sizeof (buf), 1, fp);
+
+  if (nread != 1)
+  {
+    fclose (fp);
+
+    return (PARSER_LUKS_FILE_SIZE);
+  }
+
+  u32 salt_len = 0xAB0;
+
+  salt_len = parse_and_store_salt (salt_buf_ptr, buf, salt_len, hashconfig);
 
   if (salt_len == UINT_MAX) return (PARSER_SALT_LENGTH);
 
@@ -19345,11 +19388,12 @@ int hashconfig_init (hashcat_ctx_t *hashcat_ctx)
                  break;
 
     case   150:  hashconfig->hash_type      = HASH_TYPE_SHA1;
-                 hashconfig->salt_type      = SALT_TYPE_INTERN;
+                 hashconfig->salt_type      = SALT_TYPE_EMBEDDED;
                  hashconfig->attack_exec    = ATTACK_EXEC_INSIDE_KERNEL;
                  hashconfig->opts_type      = OPTS_TYPE_PT_GENERATE_BE
                                             | OPTS_TYPE_ST_ADD80
-                                            | OPTS_TYPE_ST_ADDBITS15;
+                                            | OPTS_TYPE_ST_ADDBITS15
+                                            | OPTS_TYPE_ST_GENERATE_LE;
                  hashconfig->kern_type      = KERN_TYPE_HMACSHA1_PW;
                  hashconfig->dgst_size      = DGST_SIZE_4_5;
                  hashconfig->parse_func     = hmacsha1_parse_hash;
