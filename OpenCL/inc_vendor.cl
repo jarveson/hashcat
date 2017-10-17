@@ -51,7 +51,7 @@
 #define AMD_GCN 3
 // According to AMD docs, GCN 3 and 4 are the same
 #elif defined __gfx900__ || defined __gfx901__ || defined __gfx902__ || defined __gfx903__
-#define AMD_GCN 5
+#define AMD_GCN 2
 #else
 #define AMD_GCN 0
 #endif
