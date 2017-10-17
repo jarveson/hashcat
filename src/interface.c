@@ -15265,7 +15265,14 @@ int ps3_nid_parse_hash (u8 *input_buf, u32 input_len, hash_t *hash_buf, MAYBE_UN
   digest[3] = 0;
   digest[4] = 0;
   
-  digest[0] -= SHA1M_A;
+  if (hashconfig->opti_type & OPTI_TYPE_PRECOMPUTE_MERKLE)
+  {
+    digest[0] -= SHA1M_A;
+    digest[1] -= SHA1M_B;
+    digest[2] -= SHA1M_C;
+    digest[3] -= SHA1M_D;
+    digest[4] -= SHA1M_E;
+  }
 
   u32 salt_len = 32;
 
@@ -19630,6 +19637,7 @@ int ascii_digest (hashcat_ctx_t *hashcat_ctx, char *out_buf, const size_t out_le
       iv,
       contents_len,
       contents);
+  }
   else if (hash_mode == 16111)
   {
     u32 bswapped[2];
