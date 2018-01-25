@@ -18413,7 +18413,7 @@ int ascii_digest (hashcat_ctx_t *hashcat_ctx, char *out_buf, const size_t out_le
   }
   else if (hash_mode == 16110)
   {
-    snprintf(out_buf, out_len -1, "%08x", byte_swap_32(digest_buf[0]));
+    snprintf(out_buf, out_len - 1, "%08x", byte_swap_32(digest_buf[0]));
   }
   else if (hash_mode == 16111)
   {
@@ -18421,10 +18421,10 @@ int ascii_digest (hashcat_ctx_t *hashcat_ctx, char *out_buf, const size_t out_le
     bswapped[0] = byte_swap_32(digest_buf[0]);
     bswapped[1] = byte_swap_32(digest_buf[1]);
 
-    u8 encoded[11];
-
+    u8 encoded[12];
     ps4_encode_hash((u8*)bswapped, encoded);
-    snprintf(out_buf, 11, "%s", (char*)encoded);
+    encoded[11] = 0;
+    snprintf(out_buf, out_len - 1, "%s", (char*)encoded);
   }
   else if (hash_mode == 99999)
   {
